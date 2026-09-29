@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trama · Todo lo que pasa en tu obra, en un solo lugar</title>
+<meta name="description" content="Trama ordena los audios de WhatsApp, los mails y el Trello de una desarrollista y los convierte en tareas con responsable y fecha. Nadie cambia de herramienta.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Trama · Todo lo que pasa en tu obra, en un solo lugar">
+<meta property="og:description" content="Los audios de obra, los reclamos de posventa y los pedidos de compras, ordenados en tareas con responsable y fecha. Sin cambiar de herramienta.">
+<meta property="og:locale" content="es_UY">
+<meta name="theme-color" content="#0F766B">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230F766B'/><text x='50' y='69' font-size='58' text-anchor='middle' fill='white' font-family='Arial,Helvetica,sans-serif' font-weight='700'>T</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+  :root{
+    --ground:#FBFBFA;
+    --surface:#FFFFFF;
+    --veil:rgba(255,255,255,0.65);
+    --ink:#15181A;
+    --ink-soft:#53585C;
+    --muted:#8B9194;
+    --hair:#E8E9E8;
+    --accent:#0F766B;
+    --accent-2:#16A292;
+    --thread:#0F766B;
+    --btn-fg:#FFFFFF;
+    --ui:"Manrope","Helvetica Neue",Helvetica,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --maxw:1120px;
+    --read:720px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#090B0B;
+      --surface:#0F1312;
+      --veil:rgba(9,11,11,0.6);
+      --ink:#F1F3F2;
+      --ink-soft:#B2B9B7;
+      --muted:#7C8482;
+      --hair:#1C2221;
+      --accent:#37C9AF;
+      --accent-2:#54DEC6;
+      --thread:#37C9AF;
+      --btn-fg:#05100E;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#090B0B;
+    --surface:#0F1312;
+    --veil:rgba(9,11,11,0.6);
+    --ink:#F1F3F2;
+    --ink-soft:#B2B9B7;
+    --muted:#7C8482;
+    --hair:#1C2221;
+    --accent:#37C9AF;
+    --accent-2:#54DEC6;
+    --thread:#37C9AF;
+    --btn-fg:#05100E;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:var(--ui);
+    font-size:17px;
+    line-height:1.65;
+    letter-spacing:-0.006em;
+    -webkit-font-smoothing:antialiased;
+  }
+  p{margin:0}
+  h1,h2,h3{margin:0;font-weight:300;letter-spacing:-0.035em;line-height:1.02;text-wrap:balance}
+  a{color:inherit}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+  .read{max-width:var(--read)}
+
+  .label{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ---------------- nav ---------------- */
+  nav{
+    position:sticky;top:0;z-index:30;
+    background:var(--veil);
+    backdrop-filter:saturate(180%) blur(18px);
+    -webkit-backdrop-filter:saturate(180%) blur(18px);
+  }
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:58px;gap:18px}
+  .mark{font-weight:600;font-size:19px;letter-spacing:-0.045em}
+  .navlinks{display:flex;align-items:center;gap:26px}
+  .navlinks a{font-size:14px;color:var(--ink-soft);text-decoration:none;transition:color .2s ease}
+  .navlinks a:hover{color:var(--ink)}
+  .navlinks a.btn, .navlinks a.btn:hover{color:var(--btn-fg)}
+  @media (max-width:720px){.navlinks a.hide-sm{display:none}}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:var(--ui);font-weight:600;font-size:15px;letter-spacing:-0.01em;
+    padding:13px 24px;border-radius:999px;text-decoration:none;white-space:nowrap;
+    background:var(--accent);color:var(--btn-fg);border:1px solid transparent;
+    transition:background .25s ease,transform .25s cubic-bezier(.2,.7,.3,1),box-shadow .25s ease;
+  }
+  .btn:hover{background:var(--accent-2);transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .btn.sm{padding:9px 18px;font-size:14px}
+  .btn.quiet{background:transparent;color:var(--ink);border-color:var(--hair)}
+  .btn.quiet:hover{background:transparent;border-color:var(--muted)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--accent-2);outline-offset:4px;border-radius:999px}
+
+  /* ---------------- hero ---------------- */
+  .hero{position:relative;overflow:hidden;isolation:isolate}
+  #threads{position:absolute;inset:0;width:100%;height:100%;z-index:-1;display:block}
+  .hero .wrap{
+    padding:104px 28px 96px;display:grid;gap:30px;justify-items:center;text-align:center;
+  }
+  .hero h1{
+    font-size:clamp(42px,7.6vw,88px);font-weight:200;letter-spacing:-0.045em;
+    max-width:14ch;line-height:0.99;
+  }
+  .hero h1 .soft{color:var(--ink-soft)}
+  .hero .lede{
+    font-size:clamp(18px,2vw,21px);font-weight:300;color:var(--ink-soft);
+    max-width:54ch;line-height:1.55;
+  }
+  .hero .lede b{font-weight:600;color:var(--ink)}
+  .cta-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center}
+  .fineprint{font-family:var(--mono);font-size:11.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+
+  .rise{animation:rise .9s cubic-bezier(.2,.7,.25,1) both}
+  .rise.d1{animation-delay:.06s}
+  .rise.d2{animation-delay:.13s}
+  .rise.d3{animation-delay:.2s}
+  @keyframes rise{from{opacity:.001;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* ---------------- ritmo de secciones ---------------- */
+  .sec{padding-top:104px;padding-bottom:104px}
+  .sec.tight{padding-top:80px;padding-bottom:80px}
+  @media (max-width:560px){.wrap{padding-left:20px;padding-right:20px}}
+  .sec-head{display:grid;gap:18px;max-width:var(--read);margin-bottom:64px}
+  .sec-head h2{font-size:clamp(30px,4.4vw,48px);font-weight:200}
+  .sec-head p{color:var(--ink-soft);font-size:19px;font-weight:300;max-width:56ch}
+  .hair{height:1px;background:var(--hair);border:0;margin:0}
+
+  /* ---------------- escenas ---------------- */
+  .escenas{display:grid;gap:72px}
+  .escena{display:grid;gap:18px;max-width:640px}
+  .escena.right{margin-left:auto;text-align:left}
+  .escena h3{font-size:clamp(23px,2.8vw,30px);font-weight:300;letter-spacing:-0.03em;line-height:1.15}
+  .escena p{color:var(--ink-soft);font-size:17.5px;font-weight:300}
+  .escena .area{color:var(--accent);letter-spacing:0.16em}
+  .bubble{
+    background:var(--surface);border-radius:20px 20px 20px 6px;
+    padding:16px 20px;font-size:15.5px;font-weight:400;color:var(--ink);
+    box-shadow:0 1px 2px rgba(0,0,0,.05),0 12px 34px -18px rgba(0,0,0,.35);
+    max-width:min(100%,470px);line-height:1.5;
+  }
+  .bubble .meta{
+    display:block;margin-top:10px;font-family:var(--mono);font-size:11px;
+    letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;
+  }
+  .waveform{display:flex;align-items:center;gap:3px;height:18px;margin-bottom:10px}
+  .waveform i{display:block;width:3px;border-radius:2px;background:var(--accent);opacity:.55}
+
+  .verdict{
+    font-size:clamp(24px,3.4vw,38px);font-weight:200;letter-spacing:-0.035em;
+    line-height:1.16;max-width:22ch;margin-top:16px;
+  }
+  .verdict em{font-style:normal;color:var(--accent)}
+
+  /* ---------------- pasos ---------------- */
+  .pasos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:56px 72px;max-width:960px}
+  @media (max-width:760px){.pasos{grid-template-columns:1fr;gap:44px}}
+  .paso{display:grid;gap:12px;align-content:start}
+  .paso .n{font-family:var(--mono);font-size:12px;letter-spacing:0.14em;color:var(--accent)}
+  .paso h3{font-size:22px;font-weight:500;letter-spacing:-0.025em}
+  .paso p{color:var(--ink-soft);font-size:16.5px;font-weight:300}
+
+  /* ---------------- no hay que ---------------- */
+  .nogrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:38px 64px;max-width:940px}
+  @media (max-width:760px){.nogrid{grid-template-columns:1fr;gap:30px}}
+  .no h3{font-size:19px;font-weight:600;letter-spacing:-0.02em;margin-bottom:6px}
+  .no p{color:var(--muted);font-size:16px;font-weight:300}
+
+  /* ---------------- autor ---------------- */
+  .autor{background:var(--surface)}
+  .autor .wrap{padding:104px 28px}
+  .autor .frase{
+    font-size:clamp(26px,3.8vw,40px);font-weight:200;letter-spacing:-0.035em;
+    line-height:1.14;max-width:20ch;margin-bottom:34px;
+  }
+  .autor p+p{margin-top:20px}
+  .autor .cuerpo{max-width:var(--read);color:var(--ink-soft);font-size:18px;font-weight:300}
+  .firma{margin-top:34px;font-family:var(--mono);font-size:12.5px;letter-spacing:0.06em;color:var(--muted);line-height:1.8}
+  .firma b{color:var(--ink);font-weight:400}
+
+  /* ---------------- preguntas ---------------- */
+  .qa{display:grid;gap:44px;max-width:var(--read)}
+  .qa h3{font-size:20px;font-weight:600;letter-spacing:-0.025em;margin-bottom:10px}
+  .qa p{color:var(--ink-soft);font-size:17px;font-weight:300}
+
+  /* ---------------- cierre ---------------- */
+  .cierre .wrap{padding:128px 28px;display:grid;gap:26px;justify-items:center;text-align:center}
+  .cierre h2{font-size:clamp(34px,5.6vw,60px);font-weight:200;max-width:16ch}
+  .cierre p{color:var(--ink-soft);font-size:19px;font-weight:300;max-width:48ch}
+  .pill{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--accent);border:1px solid var(--hair);border-radius:999px;padding:7px 16px;
+  }
+
+  footer .wrap{
+    padding:34px 28px 56px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;
+    font-size:13px;color:var(--muted);font-weight:300;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+<nav>
+  <div class="wrap">
+    <span class="mark">Trama</span>
+    <div class="navlinks">
+      <a href="#problema" class="hide-sm">El problema</a>
+      <a href="#como" class="hide-sm">Cómo funciona</a>
+      <a class="btn sm" href="https://calendly.com/ramirogayol/trama15" data-cta>Agendá 15 minutos</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <canvas id="threads" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <p class="label rise">Desarrollistas inmobiliarias · Uruguay y Argentina</p>
+    <h1 class="rise d1">Todo lo que pasa en tu obra, <span class="soft">en un solo lugar.</span></h1>
+    <p class="lede rise d2">Trama escucha los audios de WhatsApp, los mails y el Trello que tu equipo ya usa, y los convierte en <b>tareas con responsable y fecha</b>. Nadie cambia de herramienta. Nadie migra nada.</p>
+    <div class="cta-row rise d3">
+      <a class="btn" href="https://calendly.com/ramirogayol/trama15" data-cta>Agendá 15 minutos</a>
+      <a class="btn quiet" href="#como">Ver cómo funciona</a>
+    </div>
+    <p class="fineprint rise d3">Piloto 2026 · 3 desarrollistas · Setup en una tarde</p>
+  </div>
+</header>
+
+<hr class="hair">
+
+<section id="problema">
+  <div class="wrap sec">
+    <div class="sec-head">
+      <p class="label">El problema</p>
+      <h2>La información existe. Está en veintitrés lugares distintos.</h2>
+      <p>No es un problema de obra. Es de todas las áreas a la vez: arquitectura, obra, posventa, compras. Ninguna desarrollista pierde plata por falta de gente que trabaje bien. La pierde porque lo que alguien dijo un jueves a las 18:40 no llega a quien tenía que escucharlo.</p>
+    </div>
+
+    <div class="escenas">
+
+      <article class="escena">
+        <p class="label area">Obra</p>
+        <h3>El audio que nadie anotó</h3>
+        <div class="bubble">
+          <div class="waveform" aria-hidden="true"></div>
+          Che, avisale al arquitecto que faltan revisar los pases del piso 1 antes de que vengan los del yeso.
+          <span class="meta">Audio 0:41 · Grupo de obra · 23 integrantes · jueves 18:40</span>
+        </div>
+        <p>El lunes el yesero cerró la pared. Romper y rehacer: dos días de cuadrilla y un pedido de materiales que nadie había presupuestado.</p>
+      </article>
+
+      <article class="escena right">
+        <p class="label area">Arquitectura</p>
+        <h3>Tres pantallas y ninguna se habla con la otra</h3>
+        <p>Un arquitecto del estudio trabaja con el modelo abierto en una pantalla, el mail en la otra y tres grupos de WhatsApp en el teléfono. La modificación se pide por audio, se confirma por mail y se dibuja sin que quede registro de quién la pidió ni cuándo.</p>
+        <p>Cuando alguien pregunta por qué ese detalle cambió, la respuesta está en la memoria de una persona. Si esa persona se fue de la empresa, no está en ningún lado.</p>
+      </article>
+
+      <article class="escena">
+        <p class="label area">Posventa</p>
+        <h3>Un burlete, un mes y medio</h3>
+        <p>El reclamo entró por mail, siguió por WhatsApp y terminó en una cadena de ocho respuestas sin dueño. El propietario llamó cuatro veces. Nadie sabía en qué estado estaba, porque el estado no vivía en ningún lado.</p>
+      </article>
+
+      <article class="escena right">
+        <p class="label area">Posventa · Importación</p>
+        <h3>La pieza que quedó trabada en el puerto</h3>
+        <p>Un propietario pide el recambio de una grifería que vino con la unidad. Se pide al proveedor, se importa, y el contenedor queda tres semanas frenado en aduana.</p>
+        <p>Nadie le avisó. Peor: nadie tenía asignado avisarle. El propietario se enteró llamando él, y para la desarrollista dejó de ser un problema logístico para pasar a ser un problema de confianza — que es el que después aparece en la reventa y en las recomendaciones.</p>
+      </article>
+
+      <article class="escena">
+        <p class="label area">Compras</p>
+        <h3>El material que llegó sin aprobar</h3>
+        <p>Compras cerró un porcelanato importado con doce semanas de plazo. Arquitectura lo vio cuando bajó del camión en el obrador. La orden de compra y la aprobación técnica nunca se cruzaron en el camino.</p>
+      </article>
+
+    </div>
+
+    <p class="verdict">No te falta un sistema nuevo. Te falta que <em>los que ya tenés se hablen entre ellos.</em></p>
+  </div>
+</section>
+
+<hr class="hair">
+
+<section id="como">
+  <div class="wrap sec">
+    <div class="sec-head">
+      <p class="label">Cómo funciona</p>
+      <h2>Cuatro pasos, y después corre solo.</h2>
+      <p>El equipo de obra sigue mandando el mismo audio al mismo grupo. La diferencia es lo que pasa después.</p>
+    </div>
+
+    <div class="pasos">
+      <div class="paso">
+        <p class="n">01</p>
+        <h3>Se conecta</h3>
+        <p>WhatsApp, mail y Trello. Una tarde de setup, sin migrar historial ni pedirle a nadie que aprenda otra app.</p>
+      </div>
+      <div class="paso">
+        <p class="n">02</p>
+        <h3>Escucha y transcribe</h3>
+        <p>Cada audio queda escrito, fechado y buscable. Lo que se dijo el jueves se encuentra el lunes en dos segundos.</p>
+      </div>
+      <div class="paso">
+        <p class="n">03</p>
+        <h3>Clasifica</h3>
+        <p>Separa por área: arquitectura, obra, posventa y compras. Distingue un comentario de un pedido, y un pedido de un reclamo.</p>
+      </div>
+      <div class="paso">
+        <p class="n">04</p>
+        <h3>Asigna y persigue</h3>
+        <p>Tarea con responsable, fecha y estado. Si se vence, avisa. Si nadie la tomó en 48 horas, escala.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="hair">
+
+<section id="nocambia">
+  <div class="wrap sec">
+    <div class="sec-head">
+      <p class="label">Lo que no tenés que hacer</p>
+      <h2>La parte difícil de un software nuevo es que la gente lo use.</h2>
+      <p>Por eso Trama no pide que nadie lo use. Trabaja arriba de lo que ya está funcionando en tu empresa.</p>
+    </div>
+    <div class="nogrid">
+      <div class="no">
+        <h3>No cambiás de herramienta</h3>
+        <p>El capataz sigue en WhatsApp. Administración sigue en mail.</p>
+      </div>
+      <div class="no">
+        <h3>No migrás datos</h3>
+        <p>Empieza a ordenar desde el día que se conecta.</p>
+      </div>
+      <div class="no">
+        <h3>No capacitás a nadie</h3>
+        <p>Cero curva de aprendizaje para el equipo de obra.</p>
+      </div>
+      <div class="no">
+        <h3>No tirás tu Trello</h3>
+        <p>Se sincroniza con el tablero que ya tenés armado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="autor">
+  <div class="wrap">
+    <p class="label" style="margin-bottom:22px">Quién está atrás</p>
+    <p class="frase">Soy arquitecto y trabajo adentro de una desarrollista, en obra, todos los días.</p>
+    <div class="cuerpo">
+      <p>Trama no salió de un brainstorming. Salió de ver el mismo problema desde adentro: áreas que no se hablan, información que se pierde entre un grupo de WhatsApp y una cadena de mails, y empresas pagando por tres aplicaciones distintas para resolver lo que en realidad es un solo problema.</p>
+      <p>Estoy armando esto con desarrollistas, no para desarrollistas. Si trabajás en una y algo de todo esto te suena conocido, quiero esa conversación aunque no termines siendo cliente.</p>
+      <p class="firma"><b>Ramiro Gayol</b><br>Arquitecto · Uruguay</p>
+    </div>
+  </div>
+</section>
+
+<hr class="hair">
+
+<section id="preguntas">
+  <div class="wrap sec tight">
+    <div class="sec-head" style="margin-bottom:52px">
+      <p class="label">Lo que siempre preguntan</p>
+      <h2>Las tres primeras objeciones.</h2>
+    </div>
+    <div class="qa">
+      <div>
+        <h3>¿Tengo que darles acceso a los WhatsApp de la empresa?</h3>
+        <p>Solo a los grupos que vos elijas, y sobre una cuenta de empresa. Los chats personales del equipo no se tocan. Vos decidís qué canal entra y cuándo.</p>
+      </div>
+      <div>
+        <h3>¿Qué pasa si el equipo de obra no lo adopta?</h3>
+        <p>Es el punto: no tienen que adoptar nada. Siguen mandando el mismo audio al mismo grupo. La adopción la hace el software, no la gente.</p>
+      </div>
+      <div>
+        <h3>¿Cuánto sale?</h3>
+        <p>Abono mensual por empresa, sin costo por usuario. El número depende de cuántos canales y cuántas obras tengas abiertas — lo cerramos en la llamada, con tu caso adelante.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cierre" id="agenda">
+  <div class="wrap">
+    <span class="pill">Piloto 2026 · 3 desarrollistas</span>
+    <h2>Quince minutos, con tu obra sobre la mesa.</h2>
+    <p>Sin demo enlatada y sin presentación. Me contás cómo se mueve hoy la información entre obra, posventa y compras, y te digo derecho si Trama te sirve o no.</p>
+    <a class="btn" href="https://calendly.com/ramirogayol/trama15" data-cta>Agendá 15 minutos</a>
+    <p class="fineprint">Respondo el mismo día · Uruguay y Argentina</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Trama · Operaciones para desarrollistas inmobiliarias</span>
+    <span>Montevideo · Punta del Este · Buenos Aires</span>
+  </div>
+</footer>
+
+<script>
+  var AGENDA_URL = "https://calendly.com/ramirogayol/trama15";
+  document.querySelectorAll('[data-cta]').forEach(function(a){ a.setAttribute('href', AGENDA_URL); });
+
+  /* ── ondas del audio de obra ── */
+  (function(){
+    var w = document.querySelector('.waveform');
+    if(!w) return;
+    var h = [6,11,17,9,14,18,7,12,16,10,5,13,17,8,11,15,6,10,14,7,12,9,16,6,11];
+    h.forEach(function(v){ var i=document.createElement('i'); i.style.height=v+'px'; w.appendChild(i); });
+  })();
+
+  /* ── hilos que se tejen: movimiento continuo y orgánico ── */
+  (function(){
+    var c = document.getElementById('threads');
+    if(!c || !c.getContext) return;
+    var ctx = c.getContext('2d');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var W=0, H=0, dpr=Math.min(window.devicePixelRatio||1, 2), t=0, raf=null;
+    var N = 9;
+
+    function size(){
+      var r = c.getBoundingClientRect();
+      W = r.width; H = r.height;
+      c.width = Math.max(1, W*dpr); c.height = Math.max(1, H*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    function color(){
+      return getComputedStyle(document.documentElement).getPropertyValue('--thread').trim() || '#0F766B';
+    }
+    function render(){
+      ctx.clearRect(0,0,W,H);
+      var col = color();
+      ctx.lineCap = 'round';
+      for(var i=0;i<N;i++){
+        var p = i/(N-1);
+        var baseY = H*(0.16 + 0.68*p);
+        var amp = H*0.055*(0.5 + Math.sin(p*Math.PI)*0.9);
+        var speed = 0.00022 + i*0.000035;
+        var freq = 1.5 + i*0.22;
+        ctx.beginPath();
+        for(var x=-20; x<=W+20; x+=8){
+          var u = x/Math.max(W,1);
+          var y = baseY
+                + Math.sin(u*Math.PI*freq + t*speed*1000 + i*0.7)*amp
+                + Math.sin(u*Math.PI*(freq*0.5) - t*speed*620 + i)*amp*0.35;
+          if(x<=-20) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.strokeStyle = col;
+        ctx.globalAlpha = 0.05 + 0.08*Math.sin(p*Math.PI);
+        ctx.lineWidth = 1 + 0.9*Math.sin(p*Math.PI);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+    function loop(ts){ t = ts||0; render(); raf = requestAnimationFrame(loop); }
+
+    size();
+    if(reduce){ render(); } else { raf = requestAnimationFrame(loop); }
+
+    var to;
+    window.addEventListener('resize', function(){
+      clearTimeout(to);
+      to = setTimeout(function(){ size(); render(); }, 140);
+    });
+    document.addEventListener('visibilitychange', function(){
+      if(document.hidden){ if(raf){cancelAnimationFrame(raf); raf=null;} }
+      else if(!reduce && !raf){ raf = requestAnimationFrame(loop); }
+    });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+  })();
+</script>
+
+</body>
+</html>
